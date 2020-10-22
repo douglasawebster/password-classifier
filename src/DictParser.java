@@ -22,22 +22,23 @@ public class DictParser {
         }
 
         ArrayList<String> wordsToKeep = new ArrayList<String>();
+        Scanner keyboard = new Scanner(System.in);
         int ctr = 0;
         while(scanner.hasNextLine()) {
             String word = scanner.nextLine();
-            if (word.length() == 3) {
-                wordsToKeep.add(word);
-            } else {
-                System.out.println("Removing: " + word);
-            }
+            if (word.length() > 3) {
+                wordsToKeep.add(word.toLowerCase());
+            } 
             ctr++;
         }
+        keyboard.close();
         scanner.close();
 
         System.out.println("Read in: " + ctr);
         System.out.println("Keeping: " + wordsToKeep.size());
 
-        try {
+        // Uncomment if you want to write results to file
+        /*try {
             FileWriter fileWriter = new FileWriter("./../text-files/dict.txt");
 
             for(String word: wordsToKeep) {
@@ -47,7 +48,7 @@ public class DictParser {
         } catch (Exception e) {
             //TODO: handle exception
             return;
-        }
+        }*/
 
         
 
