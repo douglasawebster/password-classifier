@@ -16,7 +16,10 @@ import java.util.stream.*;
  * Letters or numbers in a sequence
  * Common numbers that look like letters
  * GOOD SET OF CRITERIA: http://www.passwordmeter.com
+ * Password generator: https://manytools.org/network/password-generator/
  */
+
+ 
 
 public class Main {
 
@@ -29,22 +32,34 @@ public class Main {
      * @param password the password
      * @return a measurement of how many words appear as substrings of the password
      */
-    private static int inDict(Scanner scanner, String password) {
-        int hits = 0;
+    private static double inDict(Scanner scanner, String password) {
+        double hits = 0.0;
 
         while(scanner.hasNextLine()) {
             String word = scanner.nextLine().trim();
 
             if(password.contains(word)) {
-                hits += 1;
+                hits += Math.pow(2.0, 1.0 + ((double)word.length() / (double)password.length()));
             }
 
             if(password.equals(word)) {
-                return -1;
+                return -999.0;
             }
         }
 
         return hits;
+    }
+
+    private static double alphabetCoverage(String password) {
+        ArrayList<Character> characters = new ArrayList<Character>();
+
+        for(char c: password.toCharArray()) {
+            if(!characters.contains(c)) {
+                characters.add(c);
+            }
+        }
+
+        return (double)characters.size() / 94.0;
     }
 
     /**
@@ -91,110 +106,189 @@ public class Main {
      * 
      * @param password
      */
-    private static double keyboardDistance(String password) {
-        HashMap<Character,Pair<Integer,Integer>> map = new HashMap<Character,Pair<Integer,Integer>>();
+    private static int keyboardDistance(String password) {
+        HashMap<Character,Integer[]> map = new HashMap<Character,Integer[]>();
 
         // Characters on the first row of keyboard
-        map.put('`', Pair(0,0));
-        map.put('~', Pair(0,0));
-        map.put('1', Pair(1,0));
-        map.put('2', Pair(2,0));
-        map.put('3', Pair(3,0));
-        map.put('4', Pair(4,0));
-        map.put('5', Pair(5,0));
-        map.put('6', Pair(6,0));
-        map.put('7', Pair(7,0));
-        map.put('8', Pair(8,0));
-        map.put('9', Pair(9,0));
-        map.put('0', Pair(10,0));
-        map.put('-', Pair(11,0));
-        map.put('-', Pair(11,0));
-        map.put('+', Pair(12,0));
-        map.put('=', Pair(12,0));
+        map.put('`', new Integer[] {0,0});
+        map.put('~', new Integer[] {0,0});
+        map.put('1', new Integer[] {1,0});
+        map.put('!', new Integer[] {1,0});
+        map.put('2', new Integer[] {2,0});
+        map.put('@', new Integer[] {2,0});
+        map.put('3', new Integer[] {3,0});
+        map.put('#', new Integer[] {3,0});
+        map.put('4', new Integer[] {4,0});
+        map.put('$', new Integer[] {4,0});
+        map.put('5', new Integer[] {5,0});
+        map.put('%', new Integer[] {5,0});
+        map.put('6', new Integer[] {6,0});
+        map.put('^', new Integer[] {6,0});
+        map.put('7', new Integer[] {7,0});
+        map.put('&', new Integer[] {7,0});
+        map.put('8', new Integer[] {8,0});
+        map.put('*', new Integer[] {8,0});
+        map.put('9', new Integer[] {9,0});
+        map.put('(', new Integer[] {9,0});
+        map.put('0', new Integer[] {10,0});
+        map.put(')', new Integer[] {10,0});
+        map.put('-', new Integer[] {11,0});
+        map.put('_', new Integer[] {11,0});
+        map.put('+', new Integer[] {12,0});
+        map.put('=', new Integer[] {12,0});
 
         // Characters on the second row of keyboard
-        map.put('q', Pair(0,1));
-        map.put('w', Pair(1,1));
-        map.put('e', Pair(2,1));
-        map.put('r', Pair(3,1));
-        map.put('t', Pair(4,1));
-        map.put('y', Pair(5,1));
-        map.put('u', Pair(6,1));
-        map.put('i', Pair(7,1));
-        map.put('o', Pair(8,1));
-        map.put('p', Pair(9,1));
-        map.put('{', Pair(10,1));
-        map.put('[', Pair(10,1));
-        map.put('}', Pair(11,1));
-        map.put(']', Pair(11,1));
-        map.put('\\', Pair(12,1));
-        map.put('|', Pair(12,1));
+        map.put('q', new Integer[] {0,1});
+        map.put('w', new Integer[] {1,1});
+        map.put('e', new Integer[] {2,1});
+        map.put('r', new Integer[] {3,1});
+        map.put('t', new Integer[] {4,1});
+        map.put('y', new Integer[] {5,1});
+        map.put('u', new Integer[] {6,1});
+        map.put('i', new Integer[] {7,1});
+        map.put('o', new Integer[] {8,1});
+        map.put('p', new Integer[] {9,1});
+        map.put('{', new Integer[] {10,1});
+        map.put('[', new Integer[] {10,1});
+        map.put('}', new Integer[] {11,1});
+        map.put(']', new Integer[] {11,1});
+        map.put('\\', new Integer[] {12,1});
+        map.put('|', new Integer[] {12,1});
 
         // Characters on the second row of keyboard
-        map.put('a', Pair(0,2));
-        map.put('s', Pair(1,2));
-        map.put('d', Pair(2,2));
-        map.put('f', Pair(3,2));
-        map.put('g', Pair(4,2));
-        map.put('h', Pair(5,2));
-        map.put('j', Pair(6,2));
-        map.put('k', Pair(7,2));
-        map.put('l', Pair(8,2));
-        map.put(';', Pair(9,2));
-        map.put(':', Pair(9,2));
-        map.put('\"', Pair(10,2));
-        map.put('\'', Pair(10,2));
+        map.put('a', new Integer[] {0,2});
+        map.put('s', new Integer[] {1,2});
+        map.put('d', new Integer[] {2,2});
+        map.put('f', new Integer[] {3,2});
+        map.put('g', new Integer[] {4,2});
+        map.put('h', new Integer[] {5,2});
+        map.put('j', new Integer[] {6,2});
+        map.put('k', new Integer[] {7,2});
+        map.put('l', new Integer[] {8,2});
+        map.put(';', new Integer[] {9,2});
+        map.put(':', new Integer[] {9,2});
+        map.put('\"', new Integer[] {10,2});
+        map.put('\'', new Integer[] {10,2});
 
         // Characters on the third row of keyboard
-        map.put('z', Pair(0,3));
-        map.put('x', Pair(1,3));
-        map.put('c', Pair(2,3));
-        map.put('v', Pair(3,3));
-        map.put('b', Pair(4,3));
-        map.put('n', Pair(5,3));
-        map.put('m', Pair(6,3));
-        map.put(',', Pair(7,3));
-        map.put('<', Pair(7,3));
-        map.put('.', Pair(8,3));
-        map.put('>', Pair(8,3));
-        map.put('/', Pair(9,3));
-        map.put('?', Pair(9,3));
+        map.put('z', new Integer[] {0,3});
+        map.put('x', new Integer[] {1,3});
+        map.put('c', new Integer[] {2,3});
+        map.put('v', new Integer[] {3,3});
+        map.put('b', new Integer[] {4,3});
+        map.put('n', new Integer[] {5,3});
+        map.put('m', new Integer[] {6,3});
+        map.put(',', new Integer[] {7,3});
+        map.put('<', new Integer[] {7,3});
+        map.put('.', new Integer[] {8,3});
+        map.put('>', new Integer[] {8,3});
+        map.put('/', new Integer[] {9,3});
+        map.put('?', new Integer[] {9,3});
+
+        char[] lowerPassword = password.toLowerCase().toCharArray();
+
+        int manhattanDistance = 0;
+        for(int i = 0; i < lowerPassword.length; i++) {
+            Integer[] currCoordinate = map.get(lowerPassword[i]);
+
+            if((i - 1) >= 0) {
+                Integer[] leftCoordinate = map.get(lowerPassword[i-1]);
+                
+                int xDist = Math.abs(currCoordinate[0] - leftCoordinate[0]);
+                int yDist = Math.abs(currCoordinate[1] - leftCoordinate[1]);
+
+                manhattanDistance += xDist + yDist;
+            }
+
+            if((i + 1) < lowerPassword.length) {
+                Integer[] rightCoordinate = map.get(lowerPassword[i+1]);
+
+                int xDist = Math.abs(currCoordinate[0] - rightCoordinate[0]);
+                int yDist = Math.abs(currCoordinate[1] - rightCoordinate[1]);
+
+                manhattanDistance += xDist + yDist;
+            }
+
+        }
+
+        return manhattanDistance;
 
     }
 
     public static void main(String args[]) {
-        System.out.print("Please Enter Password: ");
-        Scanner keyboard = new Scanner(System.in);
-        String password = keyboard.nextLine().trim();
-        keyboard.close();
+        // System.out.print("Please Enter Password: ");
+        //Scanner keyboard = new Scanner(System.in);
+        //String password = keyboard.nextLine().trim();
+        //keyboard.close();
 
-        /*try {
-            File file = new File("./../text-files/dict.txt");
-            Scanner scanner = new Scanner(file);
-            int hits = Main.inDict(scanner, password.toLowerCase());
-            System.out.println("Dictionary: " + hits);
+        File passwordFile;
+        Scanner passwordScanner;
+        try {
+            passwordFile = new File("./sample-passwords.txt");
+            passwordScanner = new Scanner(passwordFile);
         } catch (Exception e) {
-            System.out.println("Failed to open file!");
+            //TODO: handle exception
             return;
-        }*/
+        }
 
-        /*try {
-            File file = new File("./../text-files/common-passwords.txt");
-            Scanner scanner = new Scanner(file);
-            int hits = Main.inDict(scanner, password.toLowerCase());
-            System.out.println("Common: " + hits);
-        } catch (Exception e) {
-            System.out.println("Failed to open file!");
-            return;
-        }*/
+        ArrayList<String> queries = new ArrayList<String>();
+        while(passwordScanner.hasNextLine()) {
+            String word = passwordScanner.nextLine();
+            queries.add(word);
+        }
+        System.out.println(queries);
 
-        /* double entropy = entropy(password.length());
-        System.out.println("Entropy: " + entropy);*/
 
-        double uniquenessScore = Main.uniqueness(password);
-        System.out.println(uniquenessScore);
+        for(int i = 0; i < queries.size(); i++) {
 
-        System.out.println("Password Strength: " + "");
+            String password = queries.get(i);
+
+            double dictHits = 0;
+            try {
+                File file = new File("./../text-files/dict.txt");
+                Scanner scanner = new Scanner(file);
+                dictHits = Main.inDict(scanner, password.toLowerCase());
+            } catch (Exception e) {
+                System.out.println("Failed to open file!");
+                return;
+            }
+
+            /*int passwordHits = 0;
+            try {
+                File file = new File("./../text-files/common-passwords.txt");
+                Scanner scanner = new Scanner(file);
+                passwordHits = Main.inDict(scanner, password.toLowerCase());
+            } catch (Exception e) {
+                System.out.println("Failed to open file!");
+                return;
+            }*/
+
+            double entropy = entropy(password.length());
+
+            double uniquenessScore = Main.uniqueness(password);
+
+            int keyboardDistance = Main.keyboardDistance(password);
+
+            double alphabetCoverage = alphabetCoverage(password);
+
+            //System.out.print(password + ",");
+            System.out.print("[" + dictHits + ",");
+            //System.out.print(passwordHits + ",");
+            System.out.print(entropy + ",");
+            System.out.print(alphabetCoverage + ",");
+            System.out.print(uniquenessScore + ",");
+            System.out.print(keyboardDistance + "],");
+            System.out.println("");
+
+        }
+        
+
+
+        
+
+
+
+        // System.out.println("Password Strength: " + "");
 
 
     }
