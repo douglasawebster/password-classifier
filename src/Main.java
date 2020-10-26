@@ -1,4 +1,5 @@
 import java.io.File; 
+import java.io.FileWriter;
 import java.util.Scanner; 
 import java.util.*;  
 import java.util.stream.*;
@@ -16,10 +17,8 @@ import java.util.stream.*;
  * Letters or numbers in a sequence
  * Common numbers that look like letters
  * GOOD SET OF CRITERIA: http://www.passwordmeter.com
- * Password generator: https://manytools.org/network/password-generator/
+ * Password generator: https://passwordsgenerator.net
  */
-
- 
 
 public class Main {
 
@@ -39,11 +38,11 @@ public class Main {
             String word = scanner.nextLine().trim();
 
             if(password.contains(word)) {
-                hits += Math.pow(2.0, 1.0 + ((double)word.length() / (double)password.length()));
+                hits += Math.pow(4.0, 1.0 + ((double)word.length() / (double)password.length()));
             }
 
             if(password.equals(word)) {
-                return -999.0;
+                return 100.0;
             }
         }
 
@@ -106,7 +105,7 @@ public class Main {
      * 
      * @param password
      */
-    private static int keyboardDistance(String password) {
+    private static double keyboardDistance(String password) {
         HashMap<Character,Integer[]> map = new HashMap<Character,Integer[]>();
 
         // Characters on the first row of keyboard
@@ -211,7 +210,7 @@ public class Main {
 
         }
 
-        return manhattanDistance;
+        return (double)manhattanDistance;
 
     }
 
@@ -224,24 +223,38 @@ public class Main {
         File passwordFile;
         Scanner passwordScanner;
         try {
-            passwordFile = new File("./sample-passwords.txt");
+            passwordFile = new File("./../text-files/test-passwords.txt");
             passwordScanner = new Scanner(passwordFile);
         } catch (Exception e) {
             //TODO: handle exception
             return;
         }
 
-        ArrayList<String> queries = new ArrayList<String>();
-        while(passwordScanner.hasNextLine()) {
-            String word = passwordScanner.nextLine();
-            queries.add(word);
+        ArrayList<ArrayList<String>> queries = new ArrayList<ArrayList<String>>();
+        int ctr = 0;
+        while(passwordScanner.hasNextLine() && (ctr < 200)) {
+            String line = passwordScanner.nextLine();
+            String[] words = line.split(" ");
+            ArrayList<String> password = new ArrayList<String>();
+            password.add(words[0]); // Classification
+            password.add(words[1]); // Password
+            queries.add(password);
+            ctr++;
         }
         System.out.println(queries);
 
+        FileWriter fileWriter;
+        try {
+            fileWriter = new FileWriter("./test-results.txt");
+        } catch(Exception e) {
+            return;
+        }
 
         for(int i = 0; i < queries.size(); i++) {
 
-            String password = queries.get(i);
+            ArrayList<String> data = queries.get(i);            
+            String classification = data.get(0);
+            String password = data.get(1);
 
             double dictHits = 0;
             try {
@@ -253,7 +266,18 @@ public class Main {
                 return;
             }
 
-            /*int passwordHits = 0;
+            double reverseDictHits = 0;
+            try {
+                File file = new File("./../text-files/dict.txt");
+                Scanner scanner = new Scanner(file);
+                String reversedPassword = new StringBuilder(password).reverse().toString();
+                reverseDictHits = Main.inDict(scanner, reversedPassword.toLowerCase());
+            } catch (Exception e) {
+                System.out.println("Failed to open file!");
+                return;
+            }
+
+            double passwordHits = 0;
             try {
                 File file = new File("./../text-files/common-passwords.txt");
                 Scanner scanner = new Scanner(file);
@@ -261,35 +285,47 @@ public class Main {
             } catch (Exception e) {
                 System.out.println("Failed to open file!");
                 return;
-            }*/
+            }
 
             double entropy = entropy(password.length());
 
             double uniquenessScore = Main.uniqueness(password);
 
-            int keyboardDistance = Main.keyboardDistance(password);
+            double keyboardDistance = Main.keyboardDistance(password);
 
             double alphabetCoverage = alphabetCoverage(password);
 
-            //System.out.print(password + ",");
+            String output = classification + " ";
+            output += dictHits + " ";
+            output += reverseDictHits + " ";
+            output += passwordHits + " ";
+            output += entropy + " ";
+            output += alphabetCoverage + " ";
+            output += uniquenessScore + " ";
+            output += keyboardDistance;
+
+            try {
+                fileWriter.write(output + "\n");
+            } catch(Exception e) {
+                return;
+            }
+  
+            /*System.out.print(password + ",");
             System.out.print("[" + dictHits + ",");
-            //System.out.print(passwordHits + ",");
+            System.out.print(passwordHits + ",");
             System.out.print(entropy + ",");
             System.out.print(alphabetCoverage + ",");
             System.out.print(uniquenessScore + ",");
             System.out.print(keyboardDistance + "],");
-            System.out.println("");
+            System.out.println("");*/
 
         }
-        
 
-
-        
-
-
-
-        // System.out.println("Password Strength: " + "");
-
+        try {
+            fileWriter.close();
+        } catch(Exception e) {
+            return;
+        }
 
     }
 
