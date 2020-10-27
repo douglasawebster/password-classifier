@@ -28,7 +28,8 @@ y = np.array(y_data)
 x_test_data = []
 y_test_data = []
 
-test_passwords = open("test-results.txt", "r").readlines()
+#test_passwords = open("test-results.txt", "r").readlines()
+test_passwords = open("/Users/dwebster/Desktop/test-results.txt", "r").readlines()
 for result in test_passwords:
     result_fields = result.split(" ")
     classification = int(result_fields[0])
@@ -51,6 +52,19 @@ model = LogisticRegression(solver='liblinear', random_state=0).fit(x, y)
 
 print(model.predict(test_x))
 print(model.score(test_x, test_y))
+
+#print(model.coef_[0])
+#print(model.predict_proba(x_test_data))
+
+
+"""percentages = []
+for data in x_data:
+    percentages.append(data[5])
+
+
+plt.scatter(y_data, percentages)
+plt.show()"""
+
 
 cm = confusion_matrix(test_y, model.predict(test_x))
 fig, ax = plt.subplots(figsize=(8, 8))

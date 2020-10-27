@@ -11,9 +11,10 @@ import java.util.stream.*;
  * Seeing if it is in a compromised passwords list
  * Entropy
  * Uniqueness of characters in password
+ * Alphabet coverage
+ * Keyboard distance
  * Certain number of charcters
  * Letters (upper and lower case), numbers, special characters
- * Keyboard distance
  * Letters or numbers in a sequence
  * Common numbers that look like letters
  * GOOD SET OF CRITERIA: http://www.passwordmeter.com
@@ -193,8 +194,14 @@ public class Main {
             if((i - 1) >= 0) {
                 Integer[] leftCoordinate = map.get(lowerPassword[i-1]);
                 
-                int xDist = Math.abs(currCoordinate[0] - leftCoordinate[0]);
-                int yDist = Math.abs(currCoordinate[1] - leftCoordinate[1]);
+                int xDist = 0; 
+                int yDist = 0;
+                try {
+                    xDist = Math.abs(currCoordinate[0] - leftCoordinate[0]);
+                    yDist = Math.abs(currCoordinate[1] - leftCoordinate[1]);
+                } catch(Exception e) {
+                    System.out.println(lowerPassword);
+                }
 
                 manhattanDistance += xDist + yDist;
             }
@@ -202,8 +209,15 @@ public class Main {
             if((i + 1) < lowerPassword.length) {
                 Integer[] rightCoordinate = map.get(lowerPassword[i+1]);
 
-                int xDist = Math.abs(currCoordinate[0] - rightCoordinate[0]);
-                int yDist = Math.abs(currCoordinate[1] - rightCoordinate[1]);
+                int xDist = 0; 
+                int yDist = 0;
+                try {
+                    xDist = Math.abs(currCoordinate[0] - rightCoordinate[0]);
+                    yDist = Math.abs(currCoordinate[1] - rightCoordinate[1]);
+                } catch(Exception e) {
+                    System.out.println(lowerPassword);
+                }
+                
 
                 manhattanDistance += xDist + yDist;
             }
@@ -223,7 +237,8 @@ public class Main {
         File passwordFile;
         Scanner passwordScanner;
         try {
-            passwordFile = new File("./../text-files/test-passwords.txt");
+            //passwordFile = new File("./../text-files/test-passwords.txt");
+            passwordFile = new File("/Users/dwebster/Desktop/test-passwords.txt");
             passwordScanner = new Scanner(passwordFile);
         } catch (Exception e) {
             //TODO: handle exception
@@ -231,24 +246,25 @@ public class Main {
         }
 
         ArrayList<ArrayList<String>> queries = new ArrayList<ArrayList<String>>();
-        int ctr = 0;
-        while(passwordScanner.hasNextLine() && (ctr < 200)) {
+        while(passwordScanner.hasNextLine()) {
             String line = passwordScanner.nextLine();
             String[] words = line.split(" ");
             ArrayList<String> password = new ArrayList<String>();
             password.add(words[0]); // Classification
             password.add(words[1]); // Password
             queries.add(password);
-            ctr++;
         }
         System.out.println(queries);
 
         FileWriter fileWriter;
         try {
-            fileWriter = new FileWriter("./test-results.txt");
+            //fileWriter = new FileWriter("./test-results.txt");
+            fileWriter = new FileWriter("/Users/dwebster/Desktop/test-results.txt");
         } catch(Exception e) {
             return;
         }
+
+        int ctr = 0;
 
         for(int i = 0; i < queries.size(); i++) {
 
@@ -277,15 +293,15 @@ public class Main {
                 return;
             }
 
-            double passwordHits = 0;
+            /*double passwordHits = 0;
             try {
-                File file = new File("./../text-files/common-passwords.txt");
+                File file = new File("./../text-files/training-common-passwords.txt");
                 Scanner scanner = new Scanner(file);
                 passwordHits = Main.inDict(scanner, password.toLowerCase());
             } catch (Exception e) {
                 System.out.println("Failed to open file!");
                 return;
-            }
+            }*/
 
             double entropy = entropy(password.length());
 
@@ -295,14 +311,18 @@ public class Main {
 
             double alphabetCoverage = alphabetCoverage(password);
 
+            //String output = password + " ";
             String output = classification + " ";
             output += dictHits + " ";
             output += reverseDictHits + " ";
-            output += passwordHits + " ";
+            // output += passwordHits + " ";
             output += entropy + " ";
             output += alphabetCoverage + " ";
             output += uniquenessScore + " ";
             output += keyboardDistance;
+            
+            System.out.println(ctr + " " + password);
+            ctr++;
 
             try {
                 fileWriter.write(output + "\n");
