@@ -39,7 +39,8 @@ public class Main {
             String word = scanner.nextLine().trim();
 
             if(password.contains(word)) {
-                hits += Math.pow(4.0, 1.0 + ((double)word.length() / (double)password.length()));
+                double percentageOfPassword = (double)word.length() / (double)password.length();
+                hits += Math.pow(4.0, 1.0 + percentageOfPassword);
             }
 
             if(password.equals(word)) {
@@ -50,6 +51,11 @@ public class Main {
         return hits;
     }
 
+    /**
+     * Alphabet coverage is defined as the number of unique characters divided by the total characters in the alphabet
+     * @param password the password
+     * @return the pecentage of the total characters in the alphabet covered by the password
+     */
     private static double alphabetCoverage(String password) {
         ArrayList<Character> characters = new ArrayList<Character>();
 
@@ -59,7 +65,7 @@ public class Main {
             }
         }
 
-        return (double)characters.size() / 94.0;
+        return ((double)characters.size()) / 94.0;
     }
 
     /**
@@ -103,8 +109,9 @@ public class Main {
     }
 
     /**
-     * 
-     * @param password
+     * The distance between strings in the password
+     * @param password the password
+     * @return the distance between each letter and the letter to the left and right
      */
     private static double keyboardDistance(String password) {
         HashMap<Character,Integer[]> map = new HashMap<Character,Integer[]>();
@@ -189,6 +196,7 @@ public class Main {
 
         int manhattanDistance = 0;
         for(int i = 0; i < lowerPassword.length; i++) {
+
             Integer[] currCoordinate = map.get(lowerPassword[i]);
 
             if((i - 1) >= 0) {
@@ -218,7 +226,6 @@ public class Main {
                     System.out.println(lowerPassword);
                 }
                 
-
                 manhattanDistance += xDist + yDist;
             }
 
@@ -229,123 +236,87 @@ public class Main {
     }
 
     public static void main(String args[]) {
-        // System.out.print("Please Enter Password: ");
-        //Scanner keyboard = new Scanner(System.in);
-        //String password = keyboard.nextLine().trim();
-        //keyboard.close();
 
-        File passwordFile;
-        Scanner passwordScanner;
+        System.out.print("Please Enter Password: ");
+        Scanner keyboard = new Scanner(System.in);
+        String password = keyboard.nextLine().trim();
+        keyboard.close();
+
+        boolean blacklistFlag = false;
         try {
-            //passwordFile = new File("./../text-files/test-passwords.txt");
-            passwordFile = new File("/Users/dwebster/Desktop/test-passwords.txt");
-            passwordScanner = new Scanner(passwordFile);
+            File file = new File("./../text-files/common-passwords.txt");
+            Scanner scanner = new Scanner(file);
+            blacklistFlag = Main.inDict(scanner, password.toLowerCase()) == 100 ? true : false;
+
+            if(blacklistFlag) {
+                System.out.println("weak");
+                return;
+            }
+
         } catch (Exception e) {
-            //TODO: handle exception
+            System.out.println("Failed to open file!");
             return;
         }
 
-        ArrayList<ArrayList<String>> queries = new ArrayList<ArrayList<String>>();
-        while(passwordScanner.hasNextLine()) {
-            String line = passwordScanner.nextLine();
-            String[] words = line.split(" ");
-            ArrayList<String> password = new ArrayList<String>();
-            password.add(words[0]); // Classification
-            password.add(words[1]); // Password
-            queries.add(password);
+        double dictHits = 0;
+        try {
+            File file = new File("./../text-files/dict.txt");
+            Scanner scanner = new Scanner(file);
+            dictHits = Main.inDict(scanner, password.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Failed to open file!");
+            return;
         }
-        System.out.println(queries);
+
+        double reverseDictHits = 0;
+        try {
+            File file = new File("./../text-files/dict.txt");
+            Scanner scanner = new Scanner(file);
+            String reversedPassword = new StringBuilder(password).reverse().toString();
+            reverseDictHits = Main.inDict(scanner, reversedPassword.toLowerCase());
+        } catch (Exception e) {
+            System.out.println("Failed to open file!");
+            return;
+        }
+
+        double entropy = entropy(password.length());
+
+        double uniquenessScore = Main.uniqueness(password);
+
+        double keyboardDistance = Main.keyboardDistance(password);
+
+        double alphabetCoverage = alphabetCoverage(password);
+
+        String output = dictHits + " ";
+        output += reverseDictHits + " ";
+        output += entropy + " ";
+        output += alphabetCoverage + " ";
+        output += uniquenessScore + " ";
+        output += keyboardDistance;
+
+        System.out.println(output);
 
         FileWriter fileWriter;
         try {
-            //fileWriter = new FileWriter("./test-results.txt");
-            fileWriter = new FileWriter("/Users/dwebster/Desktop/test-results.txt");
-        } catch(Exception e) {
-            return;
-        }
-
-        int ctr = 0;
-
-        for(int i = 0; i < queries.size(); i++) {
-
-            ArrayList<String> data = queries.get(i);            
-            String classification = data.get(0);
-            String password = data.get(1);
-
-            double dictHits = 0;
-            try {
-                File file = new File("./../text-files/dict.txt");
-                Scanner scanner = new Scanner(file);
-                dictHits = Main.inDict(scanner, password.toLowerCase());
-            } catch (Exception e) {
-                System.out.println("Failed to open file!");
-                return;
-            }
-
-            double reverseDictHits = 0;
-            try {
-                File file = new File("./../text-files/dict.txt");
-                Scanner scanner = new Scanner(file);
-                String reversedPassword = new StringBuilder(password).reverse().toString();
-                reverseDictHits = Main.inDict(scanner, reversedPassword.toLowerCase());
-            } catch (Exception e) {
-                System.out.println("Failed to open file!");
-                return;
-            }
-
-            /*double passwordHits = 0;
-            try {
-                File file = new File("./../text-files/training-common-passwords.txt");
-                Scanner scanner = new Scanner(file);
-                passwordHits = Main.inDict(scanner, password.toLowerCase());
-            } catch (Exception e) {
-                System.out.println("Failed to open file!");
-                return;
-            }*/
-
-            double entropy = entropy(password.length());
-
-            double uniquenessScore = Main.uniqueness(password);
-
-            double keyboardDistance = Main.keyboardDistance(password);
-
-            double alphabetCoverage = alphabetCoverage(password);
-
-            //String output = password + " ";
-            String output = classification + " ";
-            output += dictHits + " ";
-            output += reverseDictHits + " ";
-            // output += passwordHits + " ";
-            output += entropy + " ";
-            output += alphabetCoverage + " ";
-            output += uniquenessScore + " ";
-            output += keyboardDistance;
-            
-            System.out.println(ctr + " " + password);
-            ctr++;
-
-            try {
-                fileWriter.write(output + "\n");
-            } catch(Exception e) {
-                return;
-            }
-  
-            /*System.out.print(password + ",");
-            System.out.print("[" + dictHits + ",");
-            System.out.print(passwordHits + ",");
-            System.out.print(entropy + ",");
-            System.out.print(alphabetCoverage + ",");
-            System.out.print(uniquenessScore + ",");
-            System.out.print(keyboardDistance + "],");
-            System.out.println("");*/
-
-        }
-
-        try {
+            fileWriter = new FileWriter("./temp.txt");
+            fileWriter.write(output);
             fileWriter.close();
         } catch(Exception e) {
             return;
         }
+
+        ProcessBuilder pb = new ProcessBuilder("logistic-regression.py");
+		pb.directory(new File(cwd));
+		pb.redirectOutput(new File (cwd + "/results.txt"));
+		Process process = pb.start();
+		try {
+			System.out.println("Reached");
+			process.waitFor();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Done");
 
     }
 
